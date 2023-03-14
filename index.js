@@ -48,21 +48,13 @@ player.config.ytdlOptions = {
     highWaterMark: 1 << 25
 }
 
-commandsList = []
 client.commands = new Collection();
-const commandFiles = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 console.log(`Loading commands...`);
-
+const commandFiles = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
-    if (command.name && command.description) {
-        commandsList.push(command)
-        console.log(`=> [Loaded Command] -- ${command.name.toLowerCase()}`)
-        client.commands.set(command.name.toLowerCase(), command)
-        delete require.cache[require.resolve(`./commands/${file}`)];
-    } else {
-        console.log(`XX [Failed Command] -- ${file.split('.')[0].toLowerCase()}`)
-    }
+   console.log(`=> [Loaded Command] -- ${command.name.toLowerCase()}`)
+    client.commands.set(command.name.toLowerCase(), command);
 }
 
 const eventFiles = fs.readdirSync("./events").filter((file) => file.endsWith(".js"));
@@ -81,28 +73,17 @@ player.events.on("connection", (queue) =>{
     queue.metadata.send(`Biisiä ladataan`);
 });
 
+player.events.on('disconnect', (queue) => {
+    // Emitted when the bot leaves the voice channel
+    queue.metadata.send('Looks like my job here is done, leaving now!');
+});
+
 player.events.on('playerStart', (queue, track) => {
     if (queue.repeatMode !== 0) return;
-    console.log(`Toistaa kappaletta: **${track.title}**`);
+    console.log(`Toistaa kappaletta: **${track.title}**, jonka pituus on ${track.duration}`);
     queue.metadata.send(`🎶 | Nyt toistaa: **${track.title}**`);
     queue.metadata.send(`Kappaleen pituus: **${track.duration}**!`);
 });
-
-/*
-player.events.on('audioTrackAdd', (queue, track) => {
-    if (queue.isPlaying())
-    queue.metadata.send({ embeds: [embed.Embed_play("Added", track.title, track.url, track.duration, track.thumbnail, settings(queue))] });
-});
- */
-
-player.events.on('playerError', (queue, error) => {
-    console.log(`I'm having trouble connecting => ${error.message}`);
-});
-
-player.events.on('error', (queue, error) => {
-    console.log(`There was a problem with the song queue => ${error.message}`);
-});
-
 
 player.events.on('emptyChannel', (queue) => {
     queue.node.stop();
@@ -117,7 +98,45 @@ player.events.on('emptyQueue', (queue) => {
     queue.node.stop();
 });
 
-//if (!queue.deleted) queue.delete();
+/*
+player.events.on('audioTrackAdd', (queue, track) => {
+    if (queue.isPlaying())
+    // Emitted when the player adds a single song to its queue
+    queue.metadata.send(`Track **${track.title}** queued`);
+});
+
+player.events.on('audioTracksAdd', (queue, track) => {
+    // Emitted when the player adds multiple songs to its queue
+    queue.metadata.send(`Multiple Track's queued`);
+});
+
+player.events.on('playerSkip', (queue, track) => {
+    // Emitted when the audio player fails to load the stream for a song
+    queue.metadata.send(`Skipping **${track.title}** due to an issue!`);
+});
+ */
+
+player.events.on('playerError', (queue, error) => {
+    console.log(`I'm having trouble connecting => ${error.message}`);
+    console.log(error);
+});
+
+player.events.on('error', (queue, error) => {
+    console.log(`There was a problem with the song queue => ${error.message}`);
+    console.log(error);
+});
+
+player.on('debug', async (message) => {
+    // Emitted when the player sends debug info
+    // Useful for seeing what dependencies, extractors, etc are loaded
+    console.log(`General player debug event: ${message}`);
+});
+
+player.events.on('debug', async (queue, message) => {
+    // Emitted when the player queue sends debug info
+    // Useful for seeing what state the current queue is at
+    console.log(`Player debug event: ${message}`);
+});
 
 client.destroy();
 
