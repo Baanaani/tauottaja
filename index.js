@@ -85,6 +85,10 @@ player.events.on('playerStart', (queue, track) => {
     queue.metadata.send(`Kappaleen pituus: **${track.duration}**!`);
 });
 
+player.events.on('playerTrigger', (queue, track, reason) => {
+    queue.metadata.send(`Havaittu: ${reason}`);
+});
+
 player.events.on('emptyChannel', (queue) => {
     queue.node.stop();
     // Emitted when the voice channel has been empty for the set threshold

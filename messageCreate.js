@@ -11,10 +11,10 @@ module.exports = {
         const args = message.content.slice(prefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
 
-        if (!args[0]) return message.channel.send('Unohdit lisämääreen komennosta');
+        //if (!args[0]) return message.channel.send('Unohdit lisämääreen komennosta');
 
         try {
-            await command.execute(message);
+            await command.execute(message)
         } catch (error) {
             console.log(`Error executing ${message}`)
             console.log(error)
