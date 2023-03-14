@@ -7,7 +7,7 @@ module.exports = {
         const msg = await interaction.reply({ content: `Ping?`, fetchReply: true })
         if (msg) {
             const diff = msg.createdTimestamp - interaction.createdTimestamp
-            const ping = Math.round(client.ws.ping)
+            const ping = Math.round(interaction.client.ws.ping)
             return interaction.editReply(
                 `The round trip took **${diff}ms** and the heartbeat being **${ping}ms**`
             )
