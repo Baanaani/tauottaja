@@ -102,13 +102,13 @@ player.events.on('emptyQueue', (queue) => {
     queue.node.stop();
 });
 
-/*
 player.events.on('audioTrackAdd', (queue, track) => {
-    if (queue.isPlaying())
     // Emitted when the player adds a single song to its queue
     queue.metadata.send(`Track **${track.title}** queued`);
+    //if (queue.isPlaying())
 });
 
+/*
 player.events.on('audioTracksAdd', (queue, track) => {
     // Emitted when the player adds multiple songs to its queue
     queue.metadata.send(`Multiple Track's queued`);
@@ -128,12 +128,6 @@ player.events.on('playerError', (queue, error) => {
 player.events.on('error', (queue, error) => {
     console.log(`There was a problem with the song queue => ${error.message}`);
     console.log(error);
-});
-
-player.on('debug', async (message) => {
-    // Emitted when the player sends debug info
-    // Useful for seeing what dependencies, extractors, etc are loaded
-    console.log(`General player debug event: ${message}`);
 });
 
 player.events.on('debug', async (queue, message) => {
