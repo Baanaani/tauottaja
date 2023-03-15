@@ -1,43 +1,39 @@
-const {QueryType} = require('discord-player');
+const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
 
 module.exports = {
-    name: 'play',
-    description: 'Play a song in your channel!',
-    type: 1,
-    utilization: '{prefix}play [song name/URL]',
+    name : 'play',
+    description : 'Play a song of your choice!',
+    voiceChannel : true,
+    options : [
+        {
+            name : 'biisi',
+            description: 'Mitä soitetaan?',
+            type : 3,
+            required : true
+        }
+    ],
 
-    async execute(client, message, command, interaction) {
+    async execute(interaction) {
+    
         try {
-            const res = await client.player.search(command.join(' '), {
-                requestedBy: message.member,
-                searchEngine: QueryType.AUTO
-            });
+            const player = useMasterPlayer();
+            const query = interaction.options.getString('biisi', true);
+            console.log(`biisi: **${query}**`)
+            const results = await player.search(query);
 
-            await message.deferReply();
-
-            if (!res || !res.tracks.length)
-                return void message.followUp({content: 'No results were found!'});
-
-            await client.player.play(message.guild, {
-                metadata: {
-                    metadata: message.channel,
-                },
-                selfDeaf: true,
-                volume: 50,
-                leaveOnEmpty: true,
-                leaveOnEmptyCooldown: 300000,
-                leaveOnEnd: true,
-                leaveOnEndCooldown: 300000,
-            });
-            try {
-                if (!client.player.connection) await client.player.connect(message.member.voice.channel);
-            } catch {
-                void client.player(message.guildId);
-                return void message.followUp({
-                    content: 'Could not join your voice channel!',
+            if (!results.hasTracks()) { //Check if we found results for this query
+                await interaction.reply(`We found no tracks for ${query}!`);
+                return;
+            } else {
+                await player.play(interaction.member.voice.channel, results, {
+                    nodeOptions: {
+                        metadata: interaction.channel,
+                        //You can add more options over here
+                    },
                 });
             }
-            await message.followUp({
+
+        await message.followUp({
                 content: `⏱ | Loading your ${res.playlist ? 'playlist' : 'track'}...`,
             });
             await res.playlist ? client.player.addTrack(res.tracks) : client.player.addTrack(res.tracks[0]);
@@ -54,6 +50,7 @@ module.exports = {
 
         if (!queue) {
             return interaction.reply({ content: "There is no queue!" })
+
         }
 
         const trackIndex = tracks - 1;
@@ -64,6 +61,7 @@ module.exports = {
     }catch (error) {
         console.log(error)
     }
+
     try {
 
         const tracks = interaction.options.getInteger("value")

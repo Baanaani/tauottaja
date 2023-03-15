@@ -3,27 +3,37 @@ require('dotenv').config()
 //const { generateDependencyReport } = require('@discordjs/voice');
 //console.log(generateDependencyReport());
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const { Player, useQueue } = require('discord-player');
+const { Player } = require('discord-player');
 const fs = require('node:fs');
-//const queue = useQueue(process.env.GUILD_ID);
 
-//const events = fs.readdirSync("./events").filter((file) => file.endsWith(".js"));
+//const timestamp = queue.node.getTimestamp();
+//const trackDuration = timestamp.progress == 'Forever' ? 'Endless (Live)' : track.duration;
+
 //const logic = fs.readdirSync("./logic").filter((file) => file.endsWith(".js"));
 
-const client = new Client({intents: [
+
+const client = new Client({ intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.MessageContent], });
+        GatewayIntentBits.MessageContent],
+    presence: {
+        status: 'online',
+        activities: [{
+            name: 'Tauottaja',
+        }]
+    },
+});
 
-const player = new Player(client);
+const player = Player.singleton(client);
 
 player.config = {
-    prefix: ";",
+    prefix: "-",
     playing: ";play (music)",
+    lagMonitor: 1000,
     defaultVolume: 50,
-    maxVolume: 200,
+    maxVolume: 100,
     autoLeave: true,
     displayVoiceState: true,
     leaveOnStop: false,
@@ -34,44 +44,102 @@ player.config = {
 player.config.ytdlOptions = {
     filter: 'audioonly',
     quality: 'highestaudio',
-    highWaterMark: 1 << 10
+    highWaterMark: 1 << 25
 }
 
 client.commands = new Collection();
+console.log(`Loading commands...`);
 const commandFiles = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
+    console.log(`=> [Loaded Command] -- ${command.name.toLowerCase()}`)
     client.commands.set(command.name.toLowerCase(), command);
 }
-console.log(client.commands);
 
-client.once("error", (message) => {
-    console.error(`Error: ${message}`);
-});
-
-client.once('clientReady', c => {
-    console.log(`✅ ${c.user.tag} is online`)
-
-});
-/*
-client.on('messageCreate', async message => {
-    if (message.author.bot || !message.guild) return;
-    if (!client.application?.owner) await client.application?.fetch();
-
-    if (message.content === '!deploy') {
-        await message.guild.commands
-            .set(client.commands)
-            .then(() => {
-                message.reply('Deployed!');
-            })
-            .catch(err => {
-                message.reply('Could not deploy commands! Make sure the bot has the application.commands permission!');
-                console.error(err);
-            });
+const eventFiles = fs.readdirSync("./events").filter((file) => file.endsWith(".js"));
+    for (const file of eventFiles) {
+        const event = require(`./events/${file}`);
+        console.log(`=> [Loaded event] -- ${event.name}`)
+        if (event.once) {
+            client.once(event.name, (...args) => event.execute(...args));
+        } else {
+            client.on(event.name, (...args) => event.execute(...args))
+        }
     }
+
+player.events.on("connection", (queue) =>{
+    console.log('Yhteys soittimeen löydetty');
+    queue.metadata.send(`Biisiä ladataan`);
 });
 
+player.events.on('disconnect', (queue) => {
+    // Emitted when the bot leaves the voice channel
+    queue.metadata.send('Looks like my job here is done, leaving now!');
+});
 
+player.events.on('playerStart', (queue, track) => {
+    if (queue.repeatMode !== 0) return;
+    console.log(`Toistaa kappaletta: **${track.title}**, jonka pituus on ${track.duration}`);
+    queue.metadata.send(`🎶 | Nyt toistaa: **${track.title}**`);
+    queue.metadata.send(`Kappaleen pituus: **${track.duration}**!`);
+});
+
+player.events.on('playerTrigger', (queue, track, reason) => {
+    queue.metadata.send(`Havaittu: ${reason}`);
+});
+
+player.events.on('emptyChannel', (queue) => {
+    queue.node.stop();
+    // Emitted when the voice channel has been empty for the set threshold
+    // Bot will automatically leave the voice channel with this event
+    queue.metadata.send(`Leaving because no vc activity for the past 5 minutes`);
+});
+
+player.events.on('emptyQueue', (queue) => {
+    // Emitted when the player queue has finished
+    queue.metadata.send('Queue finished!');
+    queue.node.stop();
+});
+
+player.events.on('audioTrackAdd', (queue, track) => {
+    // Emitted when the player adds a single song to its queue
+    queue.metadata.send(`Track **${track.title}** queued`);
+    //if (queue.isPlaying())
+});
+
+/*
+player.events.on('audioTracksAdd', (queue, track) => {
+    // Emitted when the player adds multiple songs to its queue
+    queue.metadata.send(`Multiple Track's queued`);
+});
+
+player.events.on('playerSkip', (queue, track) => {
+    // Emitted when the audio player fails to load the stream for a song
+    queue.metadata.send(`Skipping **${track.title}** due to an issue!`);
+});
+ */
+
+player.events.on('playerError', (queue, error) => {
+    console.log(`I'm having trouble connecting => ${error.message}`);
+    console.log(error);
+});
+
+player.events.on('error', (queue, error) => {
+    console.log(`There was a problem with the song queue => ${error.message}`);
+    console.log(error);
+});
+
+player.events.on('debug', async (queue, message) => {
+    // Emitted when the player queue sends debug info
+    // Useful for seeing what state the current queue is at
+    console.log(`Player debug event: ${message}`);
+});
+
+client.destroy();
+
+client.login(process.env.DISCORD_TOKEN);
+
+/*
 client.on('messageCreate', message => {
     if (message.author.bot || !message.guild) return;
     const prefix = "?"
@@ -85,45 +153,3 @@ client.on('messageCreate', message => {
         })
     }
 });
-*/
-
-client.on('messageCreate', async message => {
-    console.log(message.client.id);
-    const command = client.commands.get(message);
-    command.execute(client, message);
-});
-
-player.events.on('play', (queue, track) => {
-    console.log('pitäisi soittaa');
-    const channel = queue.metadata.channel;
-    channel.send(`🎶 | Nyt toistaa **${track.title}**`);
-    channel.send(`Kappaleen pituus **${track.duration}**!`);
-
-    async function execute(interaction) {
-        const channel = interaction.message.member.voice.channel;
-        if (!channel) return interaction.reply('You are not connected to a voice channel!'); 
-        const query = interaction.options.getString('query', true); 
-    
-        await interaction.deferReply();
-    
-        try {
-            const { track } = await player.play(channel, query, {
-                nodeOptions: {
-                   
-                    metadata: interaction
-                }
-            });
-    
-            return interaction.followUp(`**${track.title}** enqueued!`);
-        } catch (e) {
-            return interaction.followUp(`Something went wrong: ${e}`);
-        }
-    }
-});
-
-
-//if (!queue.deleted) queue.delete();
-
-client.destroy();
-
-client.login(process.env.DISCORD_TOKEN);

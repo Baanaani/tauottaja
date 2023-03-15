@@ -1,38 +1,35 @@
 require('dotenv').config()
-//console.log(process.env)
-//const { generateDependencyReport } = require('@discordjs/voice');
-//console.log(generateDependencyReport());
-const { Routes, REST } = require('discord.js');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('node:fs');
 
-const commands = new Map();
-let jsonCommands = [];
+const client = new Client({intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent], });
+
+client.commands = new Collection();
 const commandFiles = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
-    const name = command.name;
-    commands.set(name, command);
-    commands.push(command.data.toJSON());
-    console.log(`Loaded command: '${name}'`);
+    client.commands.set(command.name.toLowerCase(), command);
 }
+console.log(client.commands);
 
-this.commands = commands;
-// Construct and prepare an instance of the REST module
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+client.on('messageCreate', async message => {
+    if (message.author.bot || !message.guild) return;
+    if (!client.application?.owner) await client.application?.fetch();
 
-(async () => {
-    try {
-        console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
-        // The put method is used to fully refresh all commands in the guild with the current set
-        const data = await rest.put(
-            Routes.applicationCommands(process.env.CLIENT_ID),
-            { body: jsonCommands, }
-        );
-
-        console.log(`Successfully reloaded ${data.length} application (/) commands.`);
-    } catch (error) {
-        // And of course, make sure you catch and log any errors!
-        console.error(error);
+    if (message.content === '!deploy') {
+        await message.guild.commands
+            .set(client.commands)
+            .then(() => {
+                message.reply('Deployed!');
+            })
+            .catch(err => {
+                message.reply('Could not deploy commands! Make sure the bot has the application.commands permission!');
+                console.error(err);
+            });
     }
-})();
+});
+
+client.login(process.env.DISCORD_TOKEN);
