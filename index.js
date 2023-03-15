@@ -9,6 +9,7 @@ const fs = require('node:fs');
 const events = fs.readdirSync("./events").filter((file) => file.endsWith(".js"));
 const commands = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 const logic = fs.readdirSync("./logic").filter((file) => file.endsWith(".js"));
+const stop = require('./stop.js');
 
 const client = new Client({intents: [
         GatewayIntentBits.Guilds,
@@ -40,7 +41,7 @@ client.once(Events.ClientReady, c => {
 
 client.on(Events.MessageCreate, message => {
     if (message.author.bot || !message.guild) return;
-    const prefix = "?"
+    const prefix = "%"
     const args = message.content.slice(prefix.length).trim().split(/ +/g)
 
     if (args.shift().toLowerCase() === "play") {
@@ -62,7 +63,6 @@ player.events.on('playerStart', (queue, track) => {
 //    queue.metadata.channel.send(`Started playing **${track.title}**!`);
 //    queue.metadata.channel.send(`Started playing **${track.duration}**!`);
 });
-
 
 client.destroy();
 
