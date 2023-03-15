@@ -23,7 +23,7 @@ const client = new Client({ intents: [
         activities: [{
             name: 'Tauottaja',
         }]
-    }
+    },
 });
 
 const player = Player.singleton(client);
