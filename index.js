@@ -1,32 +1,36 @@
 require('dotenv').config()
+//console.log(process.env)
+//const { generateDependencyReport } = require('@discordjs/voice');
+//console.log(generateDependencyReport());
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 
-const {Client, Events, GatewayIntentBits, Collection } = require('discord.js');
 const { Player } = require('discord-player');
 const fs = require('node:fs');
 
-const events = fs.readdirSync("./events").filter((file) => file.endsWith(".js"));
-const commands = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
-const logic = fs.readdirSync("./logic").filter((file) => file.endsWith(".js"));
+//const timestamp = queue.node.getTimestamp();
+//const trackDuration = timestamp.progress == 'Forever' ? 'Endless (Live)' : track.duration;
+
+//const logic = fs.readdirSync("./logic").filter((file) => file.endsWith(".js"));
 
 
-const client = new Client({intents: [
+const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.MessageContent],
-        presence: {
-            status: 'online',
-            activities: [{
-                name: 'Tauottaja',
-            }]
-        }
-     });
+    presence: {
+        status: 'online',
+        activities: [{
+            name: 'Tauottaja',
+        }]
+    }
+});
 
 const player = Player.singleton(client);
 
 player.config = {
-    prefix: "#",
+    prefix: "-",
     playing: ";play (music)",
     lagMonitor: 1000,
     defaultVolume: 50,
@@ -36,8 +40,6 @@ player.config = {
     leaveOnStop: false,
     leaveOnEmpty: false,
     emitNewSongOnly: true,
-    emitAddSongWhenCreatingQueue: false,
-    // emitAddListWhenCreatingQueue: false,
 };
 
 player.config.ytdlOptions = {
@@ -46,22 +48,15 @@ player.config.ytdlOptions = {
     highWaterMark: 1 << 25
 }
 
-commandsList = []
 client.commands = new Collection();
-const commandFiles = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 console.log(`Loading commands...`);
-
+const commandFiles = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
-    if (command.name && command.description) {
-        commandsList.push(command)
-        console.log(`=> [Loaded Command] -- ${command.name.toLowerCase()}`)
-        client.commands.set(command.name.toLowerCase(), command)
-        delete require.cache[require.resolve(`./commands/${file}`)];
-    } else {
-        console.log(`XX [Failed Command] -- ${file.split('.')[0].toLowerCase()}`)
-    }
+   console.log(`=> [Loaded Command] -- ${command.name.toLowerCase()}`)
+    client.commands.set(command.name.toLowerCase(), command);
 }
+
 const eventFiles = fs.readdirSync("./events").filter((file) => file.endsWith(".js"));
     for (const file of eventFiles) {
         const event = require(`./events/${file}`);
@@ -78,20 +73,21 @@ player.events.on("connection", (queue) =>{
     queue.metadata.send(`Biisiä ladataan`);
 });
 
+player.events.on('disconnect', (queue) => {
+    // Emitted when the bot leaves the voice channel
+    queue.metadata.send('Looks like my job here is done, leaving now!');
+});
+
 player.events.on('playerStart', (queue, track) => {
     if (queue.repeatMode !== 0) return;
-    console.log(`Toistaa kappaletta: **${track.title}**`);
+    console.log(`Toistaa kappaletta: **${track.title}**, jonka pituus on ${track.duration}`);
     queue.metadata.send(`🎶 | Nyt toistaa: **${track.title}**`);
     queue.metadata.send(`Kappaleen pituus: **${track.duration}**!`);
 });
-player.events.on('playerError', (queue, error) => {
-    console.log(`I'm having trouble connecting => ${error.message}`);
-});
 
-player.events.on('error', (queue, error) => {
-    console.log(`There was a problem with the song queue => ${error.message}`);
+player.events.on('playerTrigger', (queue, track, reason) => {
+    queue.metadata.send(`Havaittu: ${reason}`);
 });
-
 
 player.events.on('emptyChannel', (queue) => {
     queue.node.stop();
@@ -106,15 +102,56 @@ player.events.on('emptyQueue', (queue) => {
     queue.node.stop();
 });
 
-client.once("error", (message, error) => {
-    console.error(`Error: ${error} ${message}`);
+player.events.on('audioTrackAdd', (queue, track) => {
+    // Emitted when the player adds a single song to its queue
+    queue.metadata.send(`Track **${track.title}** queued`);
+    //if (queue.isPlaying())
 });
 
-client.once(Events.ClientReady, c => {
-    console.log(`✅ ${c.user.tag} is online`)
+/*
+player.events.on('audioTracksAdd', (queue, track) => {
+    // Emitted when the player adds multiple songs to its queue
+    queue.metadata.send(`Multiple Track's queued`);
 });
 
+player.events.on('playerSkip', (queue, track) => {
+    // Emitted when the audio player fails to load the stream for a song
+    queue.metadata.send(`Skipping **${track.title}** due to an issue!`);
+});
+ */
+
+player.events.on('playerError', (queue, error) => {
+    console.log(`I'm having trouble connecting => ${error.message}`);
+    console.log(error);
+});
+
+player.events.on('error', (queue, error) => {
+    console.log(`There was a problem with the song queue => ${error.message}`);
+    console.log(error);
+});
+
+player.events.on('debug', async (queue, message) => {
+    // Emitted when the player queue sends debug info
+    // Useful for seeing what state the current queue is at
+    console.log(`Player debug event: ${message}`);
+});
 
 client.destroy();
 
 client.login(process.env.DISCORD_TOKEN);
+
+/*
+client.on('messageCreate', message => {
+    if (message.author.bot || !message.guild) return;
+    const prefix = "?"
+    const args = message.content.slice(prefix.length).trim().split(/ +/g)
+
+    if (args.shift().toLowerCase() === "play") {
+        player.play(message.member?.voice?.channel, args.join(" "), {
+            member: message.member,
+            textChannel: message.channel,
+            message
+        })
+    }
+});
+*/
