@@ -153,4 +153,3 @@ client.on('messageCreate', message => {
         })
     }
 });
-*/

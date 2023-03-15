@@ -14,6 +14,7 @@ module.exports = {
     ],
 
     async execute(interaction) {
+    
         try {
             const player = useMasterPlayer();
             const query = interaction.options.getString('biisi', true);
@@ -31,41 +32,49 @@ module.exports = {
                     },
                 });
             }
-            await interaction.reply({content: `Loading your track(s)`});
+
+        await message.followUp({
+                content: `⏱ | Loading your ${res.playlist ? 'playlist' : 'track'}...`,
+            });
+            await res.playlist ? client.player.addTrack(res.tracks) : client.player.addTrack(res.tracks[0]);
+            if (!client.player.playing) await client.player.play();
+        }catch (error) {
+            console.log(error);
+            await message.followUp({
+                content: 'There was an error trying to execute that command: ' + error.message,
+            });
+                    try {
+
+        const tracks = interaction.options.getInteger("value")
+        const queue = interaction.client.player.nodes.get(interaction.guild)
+
+        if (!queue) {
+            return interaction.reply({ content: "There is no queue!" })
+
         }
-        /*
-            const queue = useQueue(interaction.guild.id)
 
-            //const searchResult = await player.search('biisi', {
-            //    requestedBy: interaction.user,
-            //    searchEngine: QueryType.AUTO
-            //});
-            await player.play(interaction.member.voice.channel, results);
+        const trackIndex = tracks - 1;
 
-            await interaction.deferReply()
+        await queue.node.jump(trackIndex)
 
-
-            const embed = new EmbedBuilder()
-            function yess() {
-                const totalDurationMs = yes.track.playlist.tracks.reduce((a, c) => c.durationMS + a, 0)
-                const totalDurationSec = Math.floor(totalDurationMs / 1000);
-                const hours = Math.floor(totalDurationSec / 3600);
-                const minutes = Math.floor((totalDurationSec % 3600) / 60);
-                const seconds = totalDurationSec % 60;
-                const durationStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                return durationStr
-            }
-
-            embed
-                .setDescription(`${yes.track.playlist ? `**multiple tracks** from: **${yes.track.playlist.title}**` : `**${yes.track.title}**`}`)
-                .setThumbnail(`${yes.track.playlist ? `${yes.track.playlist.thumbnail.url}` : `${yes.track.thumbnail}`}`)
-                .setColor(`#00ff08`)
-                .setTimestamp()
-                .setFooter({ text: `Duration: ${yes.track.playlist ? `${yess()}` : `${yes.track.duration}`} | Event Loop Lag ${interaction.client.player.eventLoopLag.toFixed(0)}` })
-            return interaction.editReply({ embeds: [embed ]})
-            */
-        catch (error) {
-            console.log(error)
-        }
+        return interaction.reply({ content: "Jumped successfully successfully!" })
+    }catch (error) {
+        console.log(error)
     }
-}
+
+    try {
+
+        const tracks = interaction.options.getInteger("value")
+        const queue = interaction.client.player.nodes.get(interaction.guild)
+
+        if (!queue) {
+            return interaction.reply({ content: "There is no queue!" })
+        }
+
+        const trackIndex = tracks - 1;
+
+        await queue.node.jump(trackIndex)
+
+        return interaction.reply({ content: "Jumped successfully!" })
+    }catch (error) { console.log(error) }
+}}};
