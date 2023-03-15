@@ -3,6 +3,7 @@ require('dotenv').config()
 //const { generateDependencyReport } = require('@discordjs/voice');
 //console.log(generateDependencyReport());
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
+
 const { Player } = require('discord-player');
 const fs = require('node:fs');
 
@@ -13,7 +14,6 @@ const fs = require('node:fs');
 
 
 const client = new Client({
-    intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
