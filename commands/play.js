@@ -1,5 +1,4 @@
 const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
-const { EmbedBuilder } = require("discord.js");
 
 module.exports = {
     name : 'play',
@@ -18,7 +17,7 @@ module.exports = {
         try {
             const player = useMasterPlayer();
             const query = interaction.options.getString('biisi', true);
-            console.log('biisi: **${query}**')
+            console.log(`biisi: **${query}**`)
             const results = await player.search(query);
 
             if (!results.hasTracks()) { //Check if we found results for this query
