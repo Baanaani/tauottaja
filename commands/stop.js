@@ -1,4 +1,4 @@
-const { QueryType, useMasterPlayer, useQueue } = require('discord-player');
+const { useQueue } = require('discord-player');
 
 module.exports = {
     name: 'stop',

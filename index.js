@@ -3,7 +3,6 @@ require('dotenv').config()
 //const { generateDependencyReport } = require('@discordjs/voice');
 //console.log(generateDependencyReport());
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-
 const { Player } = require('discord-player');
 const fs = require('node:fs');
 
@@ -13,7 +12,7 @@ const fs = require('node:fs');
 //const logic = fs.readdirSync("./logic").filter((file) => file.endsWith(".js"));
 
 
-const client = new Client({
+const client = new Client({ intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
@@ -53,7 +52,7 @@ console.log(`Loading commands...`);
 const commandFiles = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
-   console.log(`=> [Loaded Command] -- ${command.name.toLowerCase()}`)
+    console.log(`=> [Loaded Command] -- ${command.name.toLowerCase()}`)
     client.commands.set(command.name.toLowerCase(), command);
 }
 
