@@ -6,7 +6,7 @@ module.exports = {
     type: 1,
     utilization: '{prefix}play [song name/URL]',
 
-    async execute(client, message, command) {
+    async execute(client, message, command, interaction) {
         try {
             const res = await client.player.search(command.join(' '), {
                 requestedBy: message.member,
@@ -47,6 +47,36 @@ module.exports = {
             await message.followUp({
                 content: 'There was an error trying to execute that command: ' + error.message,
             });
+                    try {
+
+        const tracks = interaction.options.getInteger("value")
+        const queue = interaction.client.player.nodes.get(interaction.guild)
+
+        if (!queue) {
+            return interaction.reply({ content: "There is no queue!" })
         }
+
+        const trackIndex = tracks - 1;
+
+        await queue.node.jump(trackIndex)
+
+        return interaction.reply({ content: "Jumped successfully successfully!" })
+    }catch (error) {
+        console.log(error)
     }
-};
+    try {
+
+        const tracks = interaction.options.getInteger("value")
+        const queue = interaction.client.player.nodes.get(interaction.guild)
+
+        if (!queue) {
+            return interaction.reply({ content: "There is no queue!" })
+        }
+
+        const trackIndex = tracks - 1;
+
+        await queue.node.jump(trackIndex)
+
+        return interaction.reply({ content: "Jumped successfully!" })
+    }catch (error) { console.log(error) }
+}}};

@@ -93,11 +93,32 @@ client.on('messageCreate', async message => {
     command.execute(client, message);
 });
 
-player.events.on('playerStart', (queue, track) => {
+player.events.on('play', (queue, track) => {
     console.log('pitäisi soittaa');
-    const channel = queue.metadata.channel; // queue.metadata is your "message" object
+    const channel = queue.metadata.channel;
     channel.send(`🎶 | Nyt toistaa **${track.title}**`);
     channel.send(`Kappaleen pituus **${track.duration}**!`);
+
+    async function execute(interaction) {
+        const channel = interaction.message.member.voice.channel;
+        if (!channel) return interaction.reply('You are not connected to a voice channel!'); 
+        const query = interaction.options.getString('query', true); 
+    
+        await interaction.deferReply();
+    
+        try {
+            const { track } = await player.play(channel, query, {
+                nodeOptions: {
+                   
+                    metadata: interaction
+                }
+            });
+    
+            return interaction.followUp(`**${track.title}** enqueued!`);
+        } catch (e) {
+            return interaction.followUp(`Something went wrong: ${e}`);
+        }
+    }
 });
 
 
