@@ -18,6 +18,7 @@
     "dotenv": "^16.0.3",
     "ffmpeg-static": "^5.1.0",
     "opusscript": "^0.0.8",
+    "play-dl": "^1.9.6",
     "undici": "^5.20.0"
   }
 }

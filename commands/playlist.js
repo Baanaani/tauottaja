@@ -1,40 +1,39 @@
 const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
 
 module.exports = {
-    name : 'play',
-    description : 'Play a song of your choice!',
+    name : 'playlist',
+    description : 'Lisää soittolista!',
     voiceChannel : true,
     options : [
         {
-            name : 'biisi',
-            description: 'Mitä soitetaan?',
+            name : 'soittolista',
+            description: 'Mistä tuodaan soittolista?',
             type : 3,
             required : true
         }
     ],
 
     async execute(interaction) {
-    
         try {
             const channel = interaction.member.voice.channel;
             if (!channel) return interaction.reply('You are not connected to a voice channel!');
 
             const player = useMasterPlayer();
             const queue = useQueue(interaction.guild.id);
-            const query = interaction.options.getString('biisi', true);
-            console.log(`biisi: **${query}**`)
-            const result = await player.search(query, {
+            const query = interaction.options.getString('soittolista', true);
+            console.log(`Soittolista: **${query}**`)
+            const results = await player.search(query, {
                 requestedBy: interaction.user,
                 searchEngine: QueryType.AUTO,
             });
 
-            if (!result.hasTracks()) { //Check if we found results for this query
+            if (!results.hasTracks()) { //Check if we found results for this query
                 await interaction.reply(`We found no tracks for ${query}!`);
                 return;
             }
             if (!queue || !queue.node.isPlaying()) {
-                await interaction.reply({content: `Loading your track`, ephemeral: true});
-                await player.play(channel, result, {
+                await interaction.reply({content: `Soittolistaa ladataan`, ephemeral: true});
+                await player.play(channel, results, {
                     nodeOptions: {
                         metadata: {
                             channel: interaction.channel,
@@ -47,12 +46,12 @@ module.exports = {
                 });
             }
             else {
-                const index = queue.getSize();
-                queue.addTrack(result.tracks[index])
-                //queue.addTrack(result.playlist ? result.tracks : result.tracks[0])
+                queue.addTrack(results.playlist ? results.tracks : results.tracks[0])
+                //const tracks = queue.tracks.toArray();
+
             }
         } catch (error) {
-                console.log(error)
-            }
+            console.log(error)
+        }
     }
 }
