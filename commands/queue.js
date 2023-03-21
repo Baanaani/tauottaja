@@ -2,7 +2,7 @@ const { useQueue } = require('discord-player')
 
 module.exports = {
     name : 'queue',
-    description : 'näyttää jonon!',
+    description : 'Näyttää soittolistan sisällön!',
     voiceChannel : true,
 
     async execute(interaction) {
@@ -24,18 +24,18 @@ module.exports = {
 
             if (formatTracks.length <= chunkSize) {
                 const tracks = formatTracks.map(
-                    (track, idx) => `**${idx + 1})** (${track.title})\n`);
+                    (track, idx) => `**${idx + 1}.** ${track.title}\n`);
                 console.log(`Biisit: ${tracks}`);
-                await interaction.reply({content: `Biisilista: ${tracks}`, fetchReply: true});
+                await interaction.reply({content: `**Soittolista:** \n ${tracks}`, fetchReply: true});
             } else {
-                for (let i = 0; i < chunkSize; i++) {
+               // for (let i = 0; i < chunkSize; i++) {
                     const tracks = formatTracks.map(
-                        (track, idx) => `**${idx + 1})** (${track.title})\n`);
+                        (track, idx) => `**${idx + 1}.** ${track.title}\n`);
                     console.log(`Biisit: ${tracks}`);
-                    await interaction.reply({content: `Biisilista: ${tracks}`, fetchReply: true});
-                }
-                await interaction.reply({content: `Soittolistalla on vielä ${formatTracks.length - chunkSize} 
-                kappaletta, joiden sisältöä ei voida näyttää`, fetchReply: true});
+                    await interaction.reply({content: `**Soittolista:** ${tracks}`});
+               // }
+               // await interaction.editReply({content: `Soittolistalla on vielä ${formatTracks.length - chunkSize}
+               // kappaletta, joiden sisältöä ei voida näyttää`, fetchReply: true});
             }
 
         } catch (error) {
