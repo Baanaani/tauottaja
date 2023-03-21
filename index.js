@@ -142,9 +142,9 @@ player.events.on('debug', async (queue, message) => {
     console.log(`Player debug event: ${message}`);
 });
 
-client.destroy();
-
 client.login(process.env.DISCORD_TOKEN);
+
+//https://discord.com/api/oauth2/authorize?client_id=1080223260165279824&permissions=960494824704&scope=bot%20applications.commands
 
 /*
 client.on('messageCreate', message => {
@@ -160,3 +160,4 @@ client.on('messageCreate', message => {
         })
     }
 });
+*/

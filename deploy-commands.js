@@ -17,7 +17,7 @@ console.log(client.commands);
 
 client.on('messageCreate', async message => {
     if (message.author.bot || !message.guild) return;
-    //if (!client.application?.owner) await client.application?.fetch();
+    if (!client.application?.owner) await client.application?.fetch();
 
     if (message.content === '!deploy') {
         await message.guild.commands

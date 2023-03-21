@@ -1,6 +1,9 @@
 const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
+const { fs } = require('node:fs');
+const { path } =require('node:path');
+const polku = require('./musiikki/ ');
 
-    module.exports = {
+module.exports = {
     name: 'play',
     description: 'Play a song of your choice!',
     voiceChannel: true,
@@ -18,6 +21,7 @@ const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
         try {
             const channel = interaction.member.voice.channel;
             if (!channel) return interaction.reply('You are not connected to a voice channel!');
+
 
             const player = useMasterPlayer();
             const queue = useQueue(interaction.guild.id);
@@ -54,4 +58,3 @@ const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
         }
     }
 }
-
