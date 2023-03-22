@@ -24,19 +24,16 @@ module.exports = {
 
             if (formatTracks.length <= chunkSize) {
                 const tracks = formatTracks.map(
-                    (track, idx) => `**${idx + 1}.** ${track.title}\n`);
+                    (track, idx) => `**${idx + 1}.** ${track.title} \n`);
                 console.log(`Biisit: ${tracks}`);
-                await interaction.reply({content: `**Soittolista:** \n ${tracks}`, fetchReply: true});
+                await interaction.reply({content: `**Soittolista:** \n ${tracks}`});
             } else {
-               // for (let i = 0; i < chunkSize; i++) {
-                    const tracks = formatTracks.map(
-                        (track, idx) => `**${idx + 1}.** ${track.title}\n`);
-                    console.log(`Biisit: ${tracks}`);
-                    await interaction.reply({content: `**Soittolista:** ${tracks}`});
-               // }
-               // await interaction.editReply({content: `Soittolistalla on vielä ${formatTracks.length - chunkSize}
-               // kappaletta, joiden sisältöä ei voida näyttää`, fetchReply: true});
-            }
+                const tracks = formatTracks.map(
+                    (track, idx) => `**${idx + 1}.** ${track.title}`);
+                console.log(`Biisit: ${tracks}`);
+                await interaction.reply({content: `**Soittolistan ${chunkSize} seuraavaa kappaletta:** \n ${tracks.slice(0, chunkSize).join("\n")}
+                    **Soittolistalla on vielä ${formatTracks.length-chunkSize} muuta kappaletta.**`});
+                 }
 
         } catch (error) {
             console.log(error) }
