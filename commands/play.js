@@ -48,6 +48,7 @@ const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
             } else {
                 const index = queue.getSize();
                 queue.addTrack(result.tracks[index])
+                await interaction.reply({content: `Lisätään soittolistalle.`, ephemeral: true});
             }
         } catch (error) {
             console.log(error)

@@ -2,7 +2,7 @@ require('dotenv').config()
 //console.log(process.env)
 //const { generateDependencyReport } = require('@discordjs/voice');
 //console.log(generateDependencyReport());
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, EmbedBuilder } = require('discord.js');
 const { Player } = require('discord-player');
 const fs = require('node:fs');
 

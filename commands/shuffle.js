@@ -1,7 +1,7 @@
 const { useQueue } = require('discord-player')
 
 module.exports = {
-    name : 'suffle',
+    name : 'shuffle',
     description : 'Sekoita soittolista, kiitos!',
     voiceChannel : true,
 
