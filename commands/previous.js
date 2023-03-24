@@ -2,7 +2,7 @@ const {useQueue, useHistory} = require ('discord-player');
 
 module.exports = {
     name: 'previous',
-    description: 'skip the currently playing song and play the previous song',
+    description: 'Hyppää tällä hetkellä soivasta kappaleesta edellisen kappaleen alkuun',
     voiceChannel: true,
 
     async execute(interaction) {

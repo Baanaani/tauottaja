@@ -37,8 +37,5 @@ module.exports = {
 
         } catch (error) {
             console.log(error) }
-    }}
-
-//https://youtube.com/playlist?list=PLliiMqsVIF-OPMfR4mlwvdVLMp9ko0QKY
-//https://youtube.com/playlist?list=PL4QNnZJr8sRM25rNbVyQrEjRZieayr22z
-//https://youtube.com/playlist?list=PLA57XoZpnzIuRRnPuh4huTIYtkL4L-F7K
+    }
+}

@@ -7,6 +7,9 @@ module.exports = {
 
     async execute(interaction) {
         try {
+            const channel = interaction.member.voice.channel;
+            if (!channel) return interaction.reply('You are not connected to a voice channel!');
+
             const queue = useQueue(interaction.guild.id)
             if (!queue.node.isPaused() ){
                 return interaction.reply({ content: "Ei löytynyt palautettavaa musaa.", ephemeral: true })

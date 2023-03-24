@@ -1,16 +1,8 @@
 require('dotenv').config()
-//console.log(process.env)
-//const { generateDependencyReport } = require('@discordjs/voice');
-//console.log(generateDependencyReport());
-const { Client, GatewayIntentBits, Collection, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { Player } = require('discord-player');
+require('@discordjs/voice');
 const fs = require('node:fs');
-
-//const timestamp = queue.node.getTimestamp();
-//const trackDuration = timestamp.progress == 'Forever' ? 'Endless (Live)' : track.duration;
-
-//const logic = fs.readdirSync("./logic").filter((file) => file.endsWith(".js"));
-
 
 const client = new Client({ intents: [
         GatewayIntentBits.Guilds,
@@ -136,28 +128,12 @@ player.events.on('error', (queue, error) => {
     console.log(error);
 });
 
+/*
 player.events.on('debug', async (queue, message) => {
     // Emitted when the player queue sends debug info
     // Useful for seeing what state the current queue is at
     console.log(`Player debug event: ${message}`);
 });
+ */
 
 client.login(process.env.DISCORD_TOKEN);
-
-//https://discord.com/api/oauth2/authorize?client_id=1080223260165279824&permissions=960494824704&scope=bot%20applications.commands
-
-/*
-client.on('messageCreate', message => {
-    if (message.author.bot || !message.guild) return;
-    const prefix = "?"
-    const args = message.content.slice(prefix.length).trim().split(/ +/g)
-
-    if (args.shift().toLowerCase() === "play") {
-        player.play(message.member?.voice?.channel, args.join(" "), {
-            member: message.member,
-            textChannel: message.channel,
-            message
-        })
-    }
-});
-*/

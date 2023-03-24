@@ -14,7 +14,6 @@ const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
     ],
 
     async execute(interaction) {
-
         try {
             const channel = interaction.member.voice.channel;
             if (!channel) return interaction.reply('You are not connected to a voice channel!');
@@ -46,8 +45,7 @@ const { QueryType, useMasterPlayer, useQueue } = require('discord-player')
                     }
                 })
             } else {
-                const index = queue.getSize();
-                queue.addTrack(result.tracks[index])
+                queue.addTrack(result.playlist ? result.tracks : result.tracks[0])
                 await interaction.reply({content: `Lisätään soittolistalle.`, ephemeral: true});
             }
         } catch (error) {

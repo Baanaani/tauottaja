@@ -1,7 +1,6 @@
 module.exports = {
     name: 'ping',
     description: 'Returns the round trip and heartbeat',
-    usage: '', //OPTIONAL (for the help cmd)
 
     async execute(interaction) {
         const msg = await interaction.reply({ content: `Ping?`, fetchReply: true })

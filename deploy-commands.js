@@ -8,6 +8,7 @@ const client = new Client({intents: [
         GatewayIntentBits.MessageContent], });
 
 client.commands = new Collection();
+
 const commandFiles = fs.readdirSync("./commands").filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);

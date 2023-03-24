@@ -8,13 +8,14 @@ module.exports = {
 
     async execute(interaction) {
         try {
+            const channel = interaction.member.voice.channel;
+            if (!channel) return interaction.reply('You are not connected to a voice channel!');
 
             const queue = useQueue(interaction.guild.id);
 
             if (!queue.isPlaying() || !queue) {
                 return interaction.reply('No song is currently playing');
             }
-
 
             queue.node.skip();
             interaction.reply('Skipped the current song and played the next song');
