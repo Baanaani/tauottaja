@@ -1,16 +1,8 @@
 require('dotenv').config()
-//console.log(process.env)
-//const { generateDependencyReport } = require('@discordjs/voice');
-//console.log(generateDependencyReport());
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { Player } = require('discord-player');
+require('@discordjs/voice');
 const fs = require('node:fs');
-
-//const timestamp = queue.node.getTimestamp();
-//const trackDuration = timestamp.progress == 'Forever' ? 'Endless (Live)' : track.duration;
-
-//const logic = fs.readdirSync("./logic").filter((file) => file.endsWith(".js"));
-
 
 const client = new Client({ intents: [
         GatewayIntentBits.Guilds,
@@ -69,55 +61,62 @@ const eventFiles = fs.readdirSync("./events").filter((file) => file.endsWith(".j
 
 player.events.on("connection", (queue) =>{
     console.log('Yhteys soittimeen löydetty');
-    queue.metadata.send(`Biisiä ladataan`);
+    queue.metadata.channel.send(`Biisiä ladataan`);
 });
 
 player.events.on('disconnect', (queue) => {
     // Emitted when the bot leaves the voice channel
-    queue.metadata.send('Looks like my job here is done, leaving now!');
+    queue.metadata.channel.send('Looks like my job here is done, leaving now!');
 });
 
 player.events.on('playerStart', (queue, track) => {
     if (queue.repeatMode !== 0) return;
     console.log(`Toistaa kappaletta: **${track.title}**, jonka pituus on ${track.duration}`);
-    queue.metadata.send(`🎶 | Nyt toistaa: **${track.title}**`);
-    queue.metadata.send(`Kappaleen pituus: **${track.duration}**!`);
+    queue.metadata.channel.send(`🎶 | Nyt toistaa: **${track.title}**`);
+    queue.metadata.channel.send(`Kappaleen pituus: **${track.duration}**!`);
 });
 
 player.events.on('playerTrigger', (queue, track, reason) => {
-    queue.metadata.send(`Havaittu: ${reason}`);
+    queue.metadata.channel.send(`Havaittu: ${reason}`);
 });
 
 player.events.on('emptyChannel', (queue) => {
     queue.node.stop();
     // Emitted when the voice channel has been empty for the set threshold
     // Bot will automatically leave the voice channel with this event
-    queue.metadata.send(`Leaving because no vc activity for the past 5 minutes`);
+    queue.metadata.channel.send(`Leaving because no vc activity for the past 5 minutes`);
 });
 
 player.events.on('emptyQueue', (queue) => {
     // Emitted when the player queue has finished
-    queue.metadata.send('Queue finished!');
+    queue.metadata.channel.send('Queue finished!');
     queue.node.stop();
 });
 
 player.events.on('audioTrackAdd', (queue, track) => {
     // Emitted when the player adds a single song to its queue
-    queue.metadata.send(`Track **${track.title}** queued`);
-    //if (queue.isPlaying())
+    if (queue.node.isPlaying()){
+        queue.metadata.channel.send(`Lisätty jonoon ${track.title}`)
+    }
+    else {
+        queue.metadata.channel.send(`Track **${track.title}** queued`);
+    }
 });
 
-/*
 player.events.on('audioTracksAdd', (queue, track) => {
     // Emitted when the player adds multiple songs to its queue
-    queue.metadata.send(`Multiple Track's queued`);
+    if (queue.node.isPlaying()){
+        queue.metadata.channel.send(`Soittolista on lisätty ${track.title}`)
+    }
+    else {
+        queue.metadata.channel.send(`Aloitetaan soittolistan toisto kappaleesta: ${track.title}`);
+    }
 });
 
 player.events.on('playerSkip', (queue, track) => {
     // Emitted when the audio player fails to load the stream for a song
-    queue.metadata.send(`Skipping **${track.title}** due to an issue!`);
+    queue.metadata.channel.send(`Skipping **${track.title}** due to an issue!`);
 });
- */
 
 player.events.on('playerError', (queue, error) => {
     console.log(`I'm having trouble connecting => ${error.message}`);
@@ -129,27 +128,12 @@ player.events.on('error', (queue, error) => {
     console.log(error);
 });
 
+
 player.events.on('debug', async (queue, message) => {
     // Emitted when the player queue sends debug info
     // Useful for seeing what state the current queue is at
     console.log(`Player debug event: ${message}`);
 });
+ 
 
-client.destroy();
-
-client.login(process.env.DISCORD_TOKEN);
-
-/*
-client.on('messageCreate', message => {
-    if (message.author.bot || !message.guild) return;
-    const prefix = "?"
-    const args = message.content.slice(prefix.length).trim().split(/ +/g)
-
-    if (args.shift().toLowerCase() === "play") {
-        player.play(message.member?.voice?.channel, args.join(" "), {
-            member: message.member,
-            textChannel: message.channel,
-            message
-        })
-    }
-});
+client.login(process.env.TOKEN);
