@@ -98,7 +98,7 @@
     "rimraf": "^4.4.1",
     "safe-buffer": "^5.2.1",
     "sax": "^1.2.4",
-    "semver": "^7.3.8",
+    "semver": "^7.5.2",
     "set-blocking": "^2.0.0",
     "signal-exit": "^3.0.7",
     "soundcloud-scraper": "^5.0.3",
